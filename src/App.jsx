@@ -6,6 +6,7 @@ import Countries from "./components/Countries";
 import { CountriesContext } from "./hooks/contexts/CountriesContext";
 
 const App = () => {
+  const [sayam, setSayam] = useState([]);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,10 +19,11 @@ const App = () => {
         }
         return res.json();
       })
-      .then((data) => {
-        const countries = data.map((country) => {
+      .then((daTa) => {
+        const countries = daTa.map((country) => {
           return { ...country, id: uuidv4() };
         });
+        setSayam(countries);
         setData(countries);
         setIsLoading(false);
         setError(null);
@@ -31,18 +33,18 @@ const App = () => {
         setIsLoading(false);
       });
   }, []);
+
   const [value, setValue] = useState("");
   const handleChange = (e) => {
     setValue(e.target.value);
   };
+
   useEffect(() => {
     const searchValue = value.toLowerCase();
-    const filterdCountry = data.filter((country) => {
+    const filterdCountry = sayam.filter((country) => {
       const countryName = country.name.common.toLowerCase();
       return countryName.startsWith(searchValue);
     });
-    console.log(value);
-    console.log(filterdCountry);
     setData(filterdCountry);
   }, [value]);
 
