@@ -1,52 +1,32 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import "./App.css";
 import Countries from "./components/Countries";
 import { CountriesContext } from "./hooks/contexts/CountriesContext";
+import useSWRImmutable from "swr/immutable";
 
 const App = () => {
-  const [sayam, setSayam] = useState([]);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch("https://restcountries.com/v3.1/all")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed To Fetching");
-        }
-        return res.json();
-      })
-      .then((daTa) => {
-        const countries = daTa.map((country) => {
-          return { ...country, id: uuidv4() };
-        });
-        setSayam(countries);
-        setData(countries);
-        setIsLoading(false);
-        setError(null);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setIsLoading(false);
+  const [displayCountry, setDisplayCountry] = useState();
+  const url = "https://restcountries.com/v3.1/all";
+  const fetcher = (url) =>
+    fetch(url)
+      .then((r) => r.json())
+      .then((data) => {
+        const modifiedData = data.map((country) => ({ ...country, id: uuidv4() }));
+        setDisplayCountry(modifiedData);
+        return modifiedData;
       });
-  }, []);
+  const { data, error, isLoading, mutate: setData } = useSWRImmutable(url, fetcher);
 
-  const [value, setValue] = useState("");
   const handleChange = (e) => {
-    setValue(e.target.value);
-  };
-
-  useEffect(() => {
-    const searchValue = value.toLowerCase();
-    const filterdCountry = sayam.filter((country) => {
+    const searchValue = e.target.value.toLowerCase();
+    const filteredCountry = displayCountry.filter((country) => {
       const countryName = country.name.common.toLowerCase();
       return countryName.startsWith(searchValue);
     });
-    setData(filterdCountry);
-  }, [value]);
+    setData(filteredCountry, false);
+  };
 
   return (
     <CountriesContext.Provider value={{ data, setData }}>
@@ -54,7 +34,7 @@ const App = () => {
         <h1>All Country</h1>
 
         <div id="form">
-          <input type="text" required value={value} onChange={handleChange} />
+          <input type="text" required onChange={handleChange} />
         </div>
 
         {error && <p id="error">{error}</p>}

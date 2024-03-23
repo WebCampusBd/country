@@ -6,19 +6,14 @@ const Country = ({ name, src, id }) => {
   const { data, setData } = useCountriesContext();
   const deleteCountry = () => {
     const filterdCountry = data.filter((country) => country.id !== id);
-    setData(filterdCountry);
+    setData(filterdCountry, false);
   };
   return (
     <div id="country">
       <img src={src} alt="img" />
       <div>
         <h2>Name : {name}</h2>
-        <FaDeleteLeft
-          id="del"
-          onClick={() => {
-            deleteCountry();
-          }}
-        />
+        <FaDeleteLeft id="del" onClick={deleteCountry} />
       </div>
     </div>
   );
